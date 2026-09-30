@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="su" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Dongéng Sunda - Leres atawa Salah?</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sunda: {
+                            green: '#2D5A27',
+                            lightgreen: '#8FBC8F',
+                            cream: '#FDFBF7',
+                            brown: '#5C3A21',
+                            gold: '#DAA520',
+                            accent: '#3E7B27'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                        sundanese: ['Georgia', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- MediaPipe Hands & Camera Utils Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #F4F7F4;
+            color: #2D3748;
+        }
+
+        /* Sundanese Decorative Pattern Background */
+        .bg-sunda-pattern {
+            background-color: #f6faf5;
+            background-image: radial-gradient(#2D5A27 0.65px, transparent 0.65px), radial-gradient(#2D5A27 0.65px, #f6faf5 0.65px);
+            background-size: 26px 26px;
+            background-position: 0 0, 13px 13px;
+        }
+
+        /* Video element flip for mirror view */
+        .mirror-video {
+            transform: scaleX(-1);
+        }
+
+        /* Custom progress ring */
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.1s linear;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        /* Keyframe Animations */
+        @keyframes pulse-subtle {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .animate-pulse-subtle {
+            animation: pulse-subtle 2.5s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: float 4s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="h-full bg-sunda-pattern text-slate-800 flex flex-col min-h-screen selection:bg-emerald-200">
+
+    <header class="bg-sunda-green text-white shadow-md sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="showScreen('home')">
+                <span class="text-2xl">🌿</span>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight tracking-wide">PETUALANGAN DONGÉNG SUNDA</h1>
+                    <p class="text-xs text-emerald-200">Basa Sunda — Kelas VII SMP</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="toggleAudioMute()" id="audio-toggle-btn" class="p-2 bg-emerald-800/60 hover:bg-emerald-700 rounded-lg text-sm transition flex items-center gap-1.5" title="Swara / Audio">
+                    <i class="fas fa-volume-up" id="audio-icon"></i>
+                    <span class="hidden sm:inline text-xs font-semibold">Audio</span>
+                </button>
+                <button onclick="showScreen('instructions')" class="p-2 bg-emerald-800/60 hover:bg-emerald-700 rounded-lg text-sm transition flex items-center gap-1.5" title="Pituduh">
+                    <i class="fas fa-question-circle"></i>
+                    <span class="hidden sm:inline text-xs font-semibold">Pituduh</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow flex flex-col justify-center items-center p-3 sm:p-6 max-w-5xl mx-auto w-full">
+
+        <section id="screen-home" class="w-full max-w-3xl bg-white/95 backdrop-blur rounded-3xl shadow-xl border border-emerald-100 p-6 sm:p-8 text-center space-y-6">
+            <div class="relative inline-block">
+                <div class="w-24 h-24 sm:w-28 sm:h-28 mx-auto bg-emerald-100 rounded-full flex items-center justify-center text-5xl shadow-inner border-4 border-emerald-500 animate-float">
+                    📜
+                </div>
+                <span class="absolute -bottom-2 -right-2 bg-amber-400 text-amber-950 font-bold text-xs px-2.5 py-1 rounded-full shadow">
+                    Kelas VII
+                </span>
+            </div>
+
+            <div>
+                <h2 class="text-2xl sm:text-4xl font-extrabold text-sunda-green tracking-tight">
+                    🌿 PETUALANGAN DONGÉNG SUNDA
+                </h2>
+                <p class="text-lg font-bold text-amber-700 mt-1">“LERES ATAWA SALAH?”</p>
+                <p class="text-sm text-gray-600 mt-2 max-w-lg mx-auto">
+                    Uji pangaweruh anjeun ngeunaan carita rékaan, sasakala, fabel, jeung unsur intrinsik dongéng Sunda ngagunakeun deteksi gerakan leungeun!
+                </p>
+            </div>
+
+            <!-- Decorative Sundanese Cultural Banner -->
+            <div class="grid grid-cols-4 gap-2 bg-emerald-50/70 p-3 rounded-2xl border border-emerald-100 text-center text-xs text-emerald-900 font-medium">
+                <div class="flex flex-col items-center"><span class="text-xl mb-1">🏡</span> Imah Adat</div>
+                <div class="flex flex-col items-center"><span class="text-xl mb-1">🐵</span> Fabel</div>
+                <div class="flex flex-col items-center"><span class="text-xl mb-1">🏔️</span> Sasakala</div>
+                <div class="flex flex-col items-center"><span class="text-xl mb-1">🎋</span> Saung</div>
+            </div>
+
+            <!-- Student Profile Form -->
+            <div class="bg-gray-50 p-4 sm:p-5 rounded-2xl border border-gray-200 text-left space-y-3">
+                <div>
+                    <label for="student-name" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+                        <i class="fas fa-user-graduate text-emerald-600 mr-1"></i> Ngaran Murid:
+                    </label>
+                    <input type="text" id="student-name" placeholder="Tulis ngaran anjeun di dieu..." 
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition text-sm font-semibold">
+                </div>
+                <div>
+                    <label for="student-class" class="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
+                        <i class="fas fa-school text-emerald-600 mr-1"></i> Kelas:
+                    </label>
+                    <select id="student-class" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition text-sm font-semibold bg-white">
+                        <option value="VII-A">Kelas VII - A</option>
+                        <option value="VII-B">Kelas VII - B</option>
+                        <option value="VII-C">Kelas VII - C</option>
+                        <option value="VII-D">Kelas VII - D</option>
+                        <option value="VII-E">Kelas VII - E</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                <button onclick="startAppGame()" class="sm:col-span-1 bg-gradient-to-r from-emerald-600 to-sunda-green hover:from-emerald-700 hover:to-emerald-900 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                    <i class="fas fa-play"></i>
+                    <span>MIMITIAN KAULINAN</span>
+                </button>
+                <button onclick="showScreen('materi')" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 px-4 rounded-xl shadow transition flex items-center justify-center gap-2">
+                    <i class="fas fa-book-open"></i>
+                    <span>DIAJAR HEULA</span>
+                </button>
+                <button onclick="showScreen('instructions')" class="bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 px-4 rounded-xl shadow transition flex items-center justify-center gap-2">
+                    <i class="fas fa-info-circle"></i>
+                    <span>PITUDUH</span>
+                </button>
+            </div>
+
+            <!-- Privacy Badge -->
+            <div class="text-xs text-gray-500 flex items-center justify-center gap-1.5 pt-2 border-t border-gray-100">
+                <i class="fas fa-shield-alt text-emerald-600"></i>
+                <span>Kaméra ngan dipaké pikeun ngadeteksi gerakan leungeun. Poto &amp; vidéo henteu disimpen.</span>
+            </div>
+        </section>
+
+        <section id="screen-materi" class="w-full max-w-4xl bg-white rounded-3xl shadow-xl border border-emerald-100 p-6 sm:p-8 space-y-6 hidden">
+            <div class="flex justify-between items-center border-b pb-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-sunda-green flex items-center gap-2">
+                        📖 DIAJAR DONGÉNG SUNDA
+                    </h2>
+                    <p class="text-xs text-gray-500">Materi ringkes pikeun murid Kelas VII SMP</p>
+                </div>
+                <button onclick="showScreen('home')" class="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg text-gray-700 font-semibold">
+                    <i class="fas fa-arrow-left mr-1"></i> Balik
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+                <div class="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-200 space-y-2">
+                    <h3 class="font-bold text-sunda-green text-base flex items-center gap-2">
+                        <span>1.</span> Harti &amp; Ciri Dongéng
+                    </h3>
+                    <p><b>Dongéng</b> nyaéta carita rékaan (fiksi) anu sumebar sacara lisan, diwariskeun turun-tumurun, sarta mindeng ngandung unsur <b>pamohalan</b> (hal anu teu asup ku akal).</p>
+                    <ul class="list-disc list-inside space-y-1 text-xs text-gray-600 pt-1">
+                        <li>Carita rékaan / teu bener-bener kajadian.</li>
+                        <li>Ngandung unsur pamohalan (ajaib/gaib).</li>
+                        <li>Miboga amanat atawa piwuruk keur nu maca.</li>
+                        <li>Sumebar sacara lisan (anonim).</li>
+                    </ul>
+                </div>
+
+                <div class="bg-amber-50/60 p-4 rounded-2xl border border-amber-200 space-y-2">
+                    <h3 class="font-bold text-amber-800 text-base flex items-center gap-2">
+                        <span>2.</span> Rupa-rupa Dongéng
+                    </h3>
+                    <ul class="space-y-1.5 text-xs">
+                        <li><b>• Sasakala:</b> Nyaritakeun asal-usul tempat/barang (upami: <i>Tangkuban Parahu</i>).</li>
+                        <li><b>• Fabel:</b> Nyaritakeun sasatoan nu bisa nyarita kawas manusa (upami: <i>Sakadang Kuya &amp; Monyet</i>).</li>
+                        <li><b>• Mite:</b> Dongéng nu patali jeung hal gaib/kapercayaan (upami: <i>Nyi Roro Kidul</i>).</li>
+                        <li><b>• Sage:</b> Dongéng kapahlawanan / babad (upami: <i>Prabu Siliwangi</i>).</li>
+                        <li><b>• Parabel:</b> Dongéng bodor / keur ngahibur (upami: <i>Si Kabayan</i>).</li>
+                    </ul>
+                </div>
+
+                <div class="bg-sky-50/60 p-4 rounded-2xl border border-sky-200 space-y-2">
+                    <h3 class="font-bold text-sky-800 text-base flex items-center gap-2">
+                        <span>3.</span> Unsur Intrinsik Dongéng
+                    </h3>
+                    <ul class="space-y-1 text-xs">
+                        <li><b>• Téma:</b> Gagasan poko dina carita.</li>
+                        <li><b>• Tokoh &amp; Watek:</b> Pelaku jeung sipatna (Protagonis / Antagonis).</li>
+                        <li><b>• Galur:</b> Runtuyan kajadian dina carita (Maju / Mundur).</li>
+                        <li><b>• Latar:</b> Tempat, waktu, jeung suasana kajadian.</li>
+                        <li><b>• Amanat:</b> Pesen / piwuruk moril anu rék ditepikeun.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-purple-50/60 p-4 rounded-2xl border border-purple-200 space-y-2">
+                    <h3 class="font-bold text-purple-800 text-base flex items-center gap-2">
+                        <span>4.</span> Tips Ngarawap Soal
+                    </h3>
+                    <p class="text-xs">Baca kalawan taliti unggal pernyataan. Payungkeun leungeun anjeun ka kaméra pikeun milih jawaban:</p>
+                    <div class="flex justify-around pt-2 text-center text-xs font-bold">
+                        <div class="p-2 bg-emerald-100 rounded-xl text-emerald-800 w-28">✋ KATUHU<br>= LERES</div>
+                        <div class="p-2 bg-rose-100 rounded-xl text-rose-800 w-28">🤚 KÉNCA<br>= SALAH</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center pt-2">
+                <button onclick="startAppGame()" class="bg-sunda-green hover:bg-emerald-800 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition">
+                    🎮 TANDANG MAÉN AYEUNA
+                </button>
+            </div>
+        </section>
+
+        <section id="screen-instructions" class="w-full max-w-3xl bg-white rounded-3xl shadow-xl border border-emerald-100 p-6 sm:p-8 space-y-6 hidden">
+            <div class="text-center space-y-2 border-b pb-4">
+                <h2 class="text-2xl font-bold text-sunda-green">🎮 KUMAHA CARANA MAÉN?</h2>
+                <p class="text-sm text-gray-600">Petunjuk Pamakéan Deteksi Gerakan Kaméra</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 flex items-start gap-3">
+                    <div class="bg-emerald-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0">1</div>
+                    <div>
+                        <h4 class="font-bold text-emerald-900">Hurungkeun Kaméra</h4>
+                        <p class="text-xs text-gray-600 mt-1">Ijinkan browser pikeun ngaksés kaméra hareup komputer/laptop/HP anjeun.</p>
+                    </div>
+                </div>
+
+                <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 flex items-start gap-3">
+                    <div class="bg-emerald-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0">2</div>
+                    <div>
+                        <h4 class="font-bold text-emerald-900">Baca Soal Kalawan Taliti</h4>
+                        <p class="text-xs text-gray-600 mt-1">Tingali pernyataan anu muncul dina kartu utama.</p>
+                    </div>
+                </div>
+
+                <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 flex items-start gap-3">
+                    <div class="bg-emerald-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0">3</div>
+                    <div>
+                        <h4 class="font-bold text-emerald-900">Angkat Tangan Katuhu = LERES</h4>
+                        <p class="text-xs text-gray-600 mt-1">Lamun meunangkeun yen pernyataan éta LERES, angkat leungeun katuhu anjeun.</p>
+                    </div>
+                </div>
+
+                <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 flex items-start gap-3">
+                    <div class="bg-emerald-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0">4</div>
+                    <div>
+                        <h4 class="font-bold text-emerald-900">Angkat Tangan Kénca = SALAH</h4>
+                        <p class="text-xs text-gray-600 mt-1">Lamun meunangkeun yen pernyataan éta SALAH, angkat leungeun kénca anjeun.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gesture Guide Cards -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-emerald-50 border-2 border-emerald-500 rounded-2xl p-4 text-center">
+                    <span class="text-4xl">✋</span>
+                    <h3 class="font-bold text-emerald-800 text-lg mt-1">TANGAN KATUHU</h3>
+                    <p class="text-xs text-emerald-600 font-semibold uppercase tracking-wider">Jawaban: LERES</p>
+                </div>
+                <div class="bg-rose-50 border-2 border-rose-500 rounded-2xl p-4 text-center">
+                    <span class="text-4xl">🤚</span>
+                    <h3 class="font-bold text-rose-800 text-lg mt-1">TANGAN KÉNCA</h3>
+                    <p class="text-xs text-rose-600 font-semibold uppercase tracking-wider">Jawaban: SALAH</p>
+                </div>
+            </div>
+
+            <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-xs text-amber-900 flex items-start gap-3">
+                <i class="fas fa-lightbulb text-amber-600 text-lg mt-0.5"></i>
+                <div>
+                    <b>Catetan Penting:</b> Tahan posisi leungeun salila <b>0.8 detik</b> nepi ka bunderan indikator pinuh. Anjeun ogé tiasa mencét tombol jawaban di layar lamun kaméra teu diaktipkeun.
+                </div>
+            </div>
+
+            <div class="p-3 bg-gray-50 rounded-xl text-center text-xs text-gray-600">
+                🔒 <b>KAMARAHAN PRIVASI:</b> Kaméra ngan dipaké pikeun ngadeteksi gerakan leungeun sacara real-time. Poto jeung vidéo henteu direkam, disimpen, atawa dikirim ka server.
+            </div>
+
+            <div class="text-center pt-2">
+                <button onclick="showScreen('home')" class="bg-sunda-green hover:bg-emerald-800 text-white font-bold py-3 px-8 rounded-xl shadow transition">
+                    <i class="fas fa-check mr-2"></i> PANGERTIAN &amp; BALIK
+                </button>
+            </div>
+        </section>
+
+        <section id="screen-game" class="w-full space-y-4 hidden">
+            <!-- Top Dashboard Bar -->
+            <div class="bg-white rounded-2xl shadow-md p-4 border border-emerald-100 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-emerald-100 text-sunda-green font-extrabold px-3 py-1.5 rounded-xl text-xs sm:text-sm">
+                        <span id="game-progress-text">SOAL 1 / 15</span>
+                    </div>
+                    <span id="difficulty-badge" class="bg-emerald-500 text-white font-bold text-xs px-2.5 py-1 rounded-lg">
+                        🟢 GAMPANG
+                    </span>
+                    <span id="streak-badge" class="hidden bg-orange-500 text-white font-bold text-xs px-2.5 py-1 rounded-lg animate-bounce">
+                        🔥 <span id="streak-count">0</span> LERES BERTURUT!
+                    </span>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <!-- Timer Countdown -->
+                    <div class="flex items-center space-x-1.5 text-amber-600 font-bold text-sm bg-amber-50 px-3 py-1 rounded-xl border border-amber-200">
+                        <i class="fas fa-clock"></i>
+                        <span id="timer-text">15s</span>
+                    </div>
+
+                    <!-- Current Score Display -->
+                    <div class="flex items-center space-x-1 text-emerald-700 font-bold text-sm bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200">
+                        <i class="fas fa-star text-amber-400"></i>
+                        <span>Skor: <span id="game-score">0</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-gray-200 h-2.5 rounded-full overflow-hidden">
+                <div id="game-progress-bar" class="bg-sunda-green h-full transition-all duration-300" style="width: 6.66%;"></div>
+            </div>
+
+            <!-- Main Layout Grid: Question Card & Camera Stream -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+                
+                <!-- Question Card -->
+                <div class="md:col-span-8 bg-white rounded-3xl shadow-xl border border-emerald-100 p-5 sm:p-7 space-y-5 relative">
+                    
+                    <!-- Excerpt Box (Shown only if question has excerpt) -->
+                    <div id="question-excerpt-container" class="hidden bg-emerald-50/80 border-l-4 border-emerald-600 p-4 rounded-r-2xl text-xs sm:text-sm text-emerald-950 italic">
+                        <p class="font-bold not-italic mb-1 text-emerald-900"><i class="fas fa-book-reader mr-1"></i> Cutatan Dongéng:</p>
+                        <p id="question-excerpt-text" class="leading-relaxed">...</p>
+                    </div>
+
+                    <!-- Question Text -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold uppercase tracking-wider text-emerald-700" id="question-category">HARTI DONGÉNG</span>
+                            <button onclick="speakQuestionText()" class="text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 p-2 rounded-xl text-xs font-semibold flex items-center gap-1 transition" title="Maca ku sora">
+                                <i class="fas fa-volume-up"></i> Maca Soal
+                            </button>
+                        </div>
+                        <h3 id="question-text" class="text-lg sm:text-2xl font-bold text-gray-800 leading-snug">
+                            "Dongéng téh kaasup carita rékaan anu eusina bisa ngandung unsur pamohalan."
+                        </h3>
+                    </div>
+
+                    <!-- Answer Options -->
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                        <button onclick="handleAnswerSelection(true)" onmouseenter="handleOptionHover(true)" id="btn-leres" class="group relative bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-500 rounded-2xl p-4 text-center transition transform active:scale-95 focus:outline-none">
+                            <div class="text-3xl sm:text-4xl">✋</div>
+                            <div class="font-extrabold text-emerald-800 text-base sm:text-lg mt-1">LERES</div>
+                            <div class="text-xs text-emerald-600 font-medium">Tangan Katuhu</div>
+                            
+                            <!-- Hold Detection Progress Ring -->
+                            <div id="ring-leres" class="hidden absolute top-2 right-2 w-8 h-8">
+                                <svg class="w-full h-full" viewBox="0 0 36 36">
+                                    <path class="text-emerald-200" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    <path id="ring-leres-fill" class="text-emerald-600 progress-ring-circle" stroke-dasharray="100, 100" stroke-dashoffset="100" stroke-width="4" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                </svg>
+                            </div>
+                        </button>
+
+                        <button onclick="handleAnswerSelection(false)" onmouseenter="handleOptionHover(false)" id="btn-salah" class="group relative bg-rose-50 hover:bg-rose-100 border-2 border-rose-500 rounded-2xl p-4 text-center transition transform active:scale-95 focus:outline-none">
+                            <div class="text-3xl sm:text-4xl">🤚</div>
+                            <div class="font-extrabold text-rose-800 text-base sm:text-lg mt-1">SALAH</div>
+                            <div class="text-xs text-rose-600 font-medium">Tangan Kénca</div>
+
+                            <!-- Hold Detection Progress Ring -->
+                            <div id="ring-salah" class="hidden absolute top-2 right-2 w-8 h-8">
+                                <svg class="w-full h-full" viewBox="0 0 36 36">
+                                    <path class="text-rose-200" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                    <path id="ring-salah-fill" class="text-rose-600 progress-ring-circle" stroke-dasharray="100, 100" stroke-dashoffset="100" stroke-width="4" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                </svg>
+                            </div>
+                        </button>
+                    </div>
+
+                    <p class="text-center text-xs text-gray-500">
+                        💡 Angkat leungeun ka kaméra atawa pencét tombol di luhur.
+                    </p>
+                </div>
+
+                <!-- Live Camera Detection Box -->
+                <div class="md:col-span-4 space-y-3">
+                    <div class="bg-gray-900 rounded-3xl shadow-xl overflow-hidden border-2 border-emerald-500 relative aspect-video md:aspect-square flex flex-col justify-center items-center">
+                        <video id="webcam" class="w-full h-full object-cover mirror-video absolute inset-0" playsinline></video>
+                        <canvas id="output-canvas" class="w-full h-full object-cover mirror-video absolute inset-0 z-10"></canvas>
+
+                        <!-- Camera Loading Banner -->
+                        <div id="camera-loading" class="z-20 text-center p-4 text-white bg-black/70 rounded-2xl backdrop-blur max-w-xs space-y-2">
+                            <i class="fas fa-video-slash text-2xl text-amber-400" id="camera-icon"></i>
+                            <p class="text-xs font-semibold" id="camera-status-text">Ménta idin kaméra...</p>
+                            <button onclick="initCameraTracking()" class="text-xs bg-emerald-600 hover:bg-emerald-500 px-3 py-1 rounded-lg text-white font-bold">
+                                Hurungkeun Kaméra
+                            </button>
+                        </div>
+
+                        <!-- Realtime Gesture Indicator Overlay -->
+                        <div class="absolute bottom-3 left-3 right-3 z-30 bg-black/75 backdrop-blur-md rounded-xl p-2.5 border border-white/20 text-center">
+                            <div id="gesture-indicator" class="text-xs font-bold text-amber-300 flex items-center justify-center gap-1.5">
+                                <span>🟡</span> <span>Mangga arahkeun leungeun ka kaméra</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button onclick="toggleCameraMirror()" class="w-full py-2 bg-white hover:bg-gray-100 rounded-xl border border-gray-300 text-xs text-gray-700 font-bold flex items-center justify-center gap-2">
+                        <i class="fas fa-camera-rotate"></i> Toggle Saklar Kaméra / Mode Manual
+                    </button>
+                </div>
+            </div>
+
+            <div id="feedback-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+                <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center space-y-4 border-4 border-emerald-500 animate-pulse-subtle">
+                    <div id="feedback-icon-box" class="w-20 h-20 mx-auto rounded-full flex items-center justify-center text-4xl shadow-inner">
+                        🎉
+                    </div>
+                    <div>
+                        <h3 id="feedback-title" class="text-2xl font-extrabold">LERES!</h3>
+                        <p id="feedback-category-tag" class="text-xs font-bold uppercase text-emerald-700 tracking-wider mt-1">Jawaban Meredih</p>
+                    </div>
+
+                    <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 text-left space-y-1">
+                        <div class="text-xs font-bold text-emerald-900 flex items-center gap-1">
+                            💡 ALESANNA:
+                        </div>
+                        <p id="feedback-explanation" class="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                            Amanat téh mangrupa pesen atawa piwuruk anu rék ditepikeun ngaliwatan hiji carita.
+                        </p>
+                    </div>
+
+                    <div class="pt-2">
+                        <p class="text-xs text-gray-500 italic">Otomatis pindah ka soal salajengna dina sababaraha detik...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="screen-result" class="w-full max-w-3xl bg-white rounded-3xl shadow-xl border border-emerald-100 p-6 sm:p-8 space-y-6 hidden">
+            <div class="text-center space-y-2 border-b pb-4">
+                <span class="text-5xl">🎉</span>
+                <h2 class="text-3xl font-extrabold text-sunda-green">KAULINAN RÉNGSÉ!</h2>
+                <p class="text-sm text-gray-600">Wilujeng! Anjeun tos ngaréngsékeun tantangan dongéng Sunda.</p>
+            </div>
+
+            <!-- Student Summary Card -->
+            <div class="bg-emerald-50 p-5 rounded-2xl border border-emerald-200 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                <div>
+                    <span class="text-xs text-gray-500 block">Ngaran Murid</span>
+                    <span id="result-student-name" class="font-extrabold text-emerald-900 text-sm sm:text-base">-</span>
+                </div>
+                <div>
+                    <span class="text-xs text-gray-500 block">Kelas</span>
+                    <span id="result-student-class" class="font-extrabold text-emerald-900 text-sm sm:text-base">-</span>
+                </div>
+                <div>
+                    <span class="text-xs text-gray-500 block">Hasil Leres / Salah</span>
+                    <span class="font-extrabold text-emerald-900 text-sm sm:text-base">
+                        <span id="result-correct" class="text-emerald-600">0</span> / <span id="result-wrong" class="text-rose-600">0</span>
+                    </span>
+                </div>
+                <div>
+                    <span class="text-xs text-gray-500 block">Nilai Skor</span>
+                    <span id="result-final-score" class="font-black text-2xl text-sunda-green">0</span>
+                </div>
+            </div>
+
+            <!-- Score Category Banner -->
+            <div id="result-category-banner" class="bg-gradient-to-r from-emerald-600 to-sunda-green text-white p-4 rounded-2xl text-center space-y-1 shadow">
+                <div id="result-badge-title" class="text-xl font-extrabold">🌟 90–100 — Saé Pisan!</div>
+                <p id="result-message" class="text-xs sm:text-sm text-emerald-100 max-w-xl mx-auto">
+                    Hebat! Anjeun geus ngajajah dunya dongéng Sunda. Hayu terus maca dongéng sangkan beuki wanoh kana basa jeung budaya Sunda.
+                </p>
+            </div>
+
+            <!-- Student Reflection Section -->
+            <div class="bg-gray-50 p-5 rounded-2xl border border-gray-200 space-y-4 text-left">
+                <h3 class="font-bold text-sunda-green text-base flex items-center gap-2">
+                    <span>🌱</span> REFLEKSI MURID
+                </h3>
+                <p class="text-xs text-gray-600">Naon anu paling anjeun pahami sanggeus maén ieu kaulinan? (Pilih topik nu geus dipahami):</p>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-xs">
+                    <label class="flex items-center space-x-2 bg-white p-2.5 rounded-xl border border-gray-200 cursor-pointer">
+                        <input type="checkbox" class="rounded text-emerald-600 focus:ring-emerald-500" checked>
+                        <span>Harti Dongéng</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-white p-2.5 rounded-xl border border-gray-200 cursor-pointer">
+                        <input type="checkbox" class="rounded text-emerald-600 focus:ring-emerald-500" checked>
+                        <span>Rupa-rupa Dongéng</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-white p-2.5 rounded-xl border border-gray-200 cursor-pointer">
+                        <input type="checkbox" class="rounded text-emerald-600 focus:ring-emerald-500" checked>
+                        <span>Unsur Intrinsik</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-white p-2.5 rounded-xl border border-gray-200 cursor-pointer">
+                        <input type="checkbox" class="rounded text-emerald-600 focus:ring-emerald-500" checked>
+                        <span>Tokoh &amp; Watek</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-white p-2.5 rounded-xl border border-gray-200 cursor-pointer">
+                        <input type="checkbox" class="rounded text-emerald-600 focus:ring-emerald-500" checked>
+                        <span>Amanat &amp; Piwuruk</span>
+                    </label>
+                    <label class="flex items-center space-x-2 bg-white p-2.5 rounded-xl border border-gray-200 cursor-pointer">
+                        <input type="checkbox" class="rounded text-emerald-600 focus:ring-emerald-500" checked>
+                        <span>Latar &amp; Galur</span>
+                    </label>
+                </div>
+
+                <div class="space-y-1.5 pt-2">
+                    <label class="block text-xs font-bold text-gray-700">
+                        Naon piwuruk (amanat moral) anu paling ku anjeun resep tina carita dongéng nu dipelajari?
+                    </label>
+                    <textarea id="reflection-input" rows="2" placeholder="Tulis pamikiran anjeun di dieu..." 
+                        class="w-full p-3 text-xs rounded-xl border border-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <button onclick="startAppGame()" class="bg-sunda-green hover:bg-emerald-800 text-white font-bold py-3 px-4 rounded-xl shadow transition flex items-center justify-center gap-2">
+                    <i class="fas fa-rotate-right"></i> MAÉN DEUI
+                </button>
+                <button onclick="showScreen('materi')" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-4 rounded-xl shadow transition flex items-center justify-center gap-2">
+                    <i class="fas fa-book"></i> DIAJAR DEUI
+                </button>
+                <button onclick="showScreen('home')" class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-3 px-4 rounded-xl shadow transition flex items-center justify-center gap-2">
+                    <i class="fas fa-house"></i> BALIK KA HOME
+                </button>
+            </div>
+
+            <!-- GitHub Pages Guide Button -->
+            <div class="pt-4 border-t text-center">
+                <button onclick="toggleGithubGuideModal()" class="text-xs text-emerald-700 hover:text-emerald-900 font-bold underline flex items-center justify-center gap-1.5 mx-auto">
+                    <i class="fab fa-github"></i> Pituduh Upload ka GitHub &amp; GitHub Pages
+                </button>
+            </div>
+        </section>
+
+        <div id="github-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white rounded-3xl p-6 max-w-2xl w-full shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto border border-emerald-200">
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h3 class="font-bold text-lg text-sunda-green flex items-center gap-2">
+                        <i class="fab fa-github text-xl"></i> Pituduh Deploy ka GitHub Pages
+                    </h3>
+                    <button onclick="toggleGithubGuideModal()" class="text-gray-400 hover:text-gray-600 text-lg">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-3 text-xs text-gray-700 leading-relaxed">
+                    <p>Pikeun ngajalankeun ieu game dina internét sacara gratis tanpa backend/database:</p>
+                    
+                    <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200 space-y-1">
+                        <p class="font-bold text-emerald-900">1. Jieun Repository Anyar dina GitHub:</p>
+                        <p>Buka <a href="https://github.com" target="_blank" class="text-emerald-600 underline">github.com</a>, login, tuluy klik <b>New Repository</b> (misalna: <code>dongeng-sunda-game</code>).</p>
+                    </div>
+
+                    <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200 space-y-1">
+                        <p class="font-bold text-emerald-900">2. Upload File Game:</p>
+                        <p>Simpen kode ieu salaku file <code>index.html</code>. Upload file <code>index.html</code> éta ka repository anu nembe dijieun.</p>
+                    </div>
+
+                    <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200 space-y-1">
+                        <p class="font-bold text-emerald-900">3. Aktipkeun GitHub Pages:</p>
+                        <ul class="list-disc list-inside space-y-0.5 text-gray-600">
+                            <li>Buka menu <b>Settings</b> dina repository anjeun.</li>
+                            <li>Klik bagian <b>Pages</b> di bilah kénca.</li>
+                            <li>Dina <i>Build and deployment</i>, pilih Branch: <b>main</b> / <b>root</b>.</li>
+                            <li>Pencét <b>Save</b>. Tunggu 1-2 menit.</li>
+                        </ul>
+                    </div>
+
+                    <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 font-semibold text-amber-900">
+                        🌐 Website Game anjeun ayeuna siap diaksés di: <br>
+                        <code>https://[username-github].github.io/dongeng-sunda-game/</code>
+                    </div>
+                </div>
+
+                <div class="text-right pt-2 border-t">
+                    <button onclick="toggleGithubGuideModal()" class="px-4 py-2 bg-sunda-green text-white font-bold text-xs rounded-xl hover:bg-emerald-800">
+                        Tutup Pituduh
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-emerald-950 text-emerald-300 text-xs py-4 px-4 text-center border-t border-emerald-800">
+        <p>© 2026 Petualangan Dongéng Sunda — Game Edukasi Basa Sunda Kelas VII SMP</p>
+        <p class="text-emerald-500 mt-1">Dibuat pikeun Pembelajaran Interaktif berbasiskeun Kamera &amp; AI Hand Gesture</p>
+    </footer>
+
+    <script>
+        const QUESTION_BANK = [
+            {
+                id: 1,
+                question: "Dongéng téh kaasup salah sahiji wangun carita rékaan (fiksi) anu ngandung unsur pamohalan (teu masuk akal).",
+                answer: true,
+                difficulty: "🟢 GAMPANG",
+                category: "HARTI DONGÉNG",
+                explanation: "Leres. Dongéng mangrupa carita rékaan anu eusina mindeng ngandung hal-hal anu pamohalan atawa teu asup ku akal."
+            },
+            {
+                id: 2,
+                question: "Sasakala nyaéta rupa dongéng anu nyaritakeun kahirupan sasatoan anu bisa ngabogaan paripolah kawas manusa.",
+                answer: false,
+                difficulty: "🟢 GAMPANG",
+                category: "RUPA DONGÉNG",
+                explanation: "Salah. Dongéng anu nyaritakeun sasatoan disebut Fabel. Ari Sasakala mah nyaritakeun asal-usul hiji tempat, barang, atawa kajadian."
+            },
+            {
+                id: 3,
+                question: "Dongéng Fabel contona nyaéta carita 'Sakadang Kuya jeung Sakadang Monyet Ngala Nangka'.",
+                answer: true,
+                difficulty: "🟢 GAMPANG",
+                category: "RUPA DONGÉNG",
+                explanation: "Leres. Tokoh utama dina éta carita nyaéta kuya jeung monyet (sasatoan), jadi kaasup kana rupa dongéng fabel."
+            },
+            {
+                id: 4,
+                question: "Dongéng Mite nyaéta dongéng anu patali jeung kapercayaan karuhun, hal-hal gaib, atawa para dewa.",
+                answer: true,
+                difficulty: "🟡 SEDENG",
+                category: "RUPA DONGÉNG",
+                explanation: "Leres. Mite nyaéta dongéng kapercayaan atawa mahluk halus/gaib, contona dongéng Nyi Roro Kidul."
+            },
+            {
+                id: 5,
+                question: "Sage nyaéta rupa dongéng anu eusina nyaritakeun hal-hal lucu atawa bodor pikeun ngahibur nu maca.",
+                answer: false,
+                difficulty: "🟡 SEDENG",
+                category: "RUPA DONGÉNG",
+                explanation: "Salah. Dongéng ngeunaan hal lucu/bodor mah disebut Parabel (contona Si Kabayan). Ari Sage mah nyaritakeun pahlawan/sajarah."
+            },
+            {
+                id: 6,
+                question: "Amanat nyaéta piwuruk, pesen, atawa ajén moral anu rék ditepikeun ku pangarang ngaliwatan carita dongéng.",
+                answer: true,
+                difficulty: "🟢 GAMPANG",
+                category: "UNSUR INTRINSIK",
+                explanation: "Leres. Amanat mangrupa pesen atawa piwuruk anu bisa dicokot hikmahna ku nu maca atawa ngadangukeun dongéng."
+            },
+            {
+                id: 7,
+                question: "Latar tempat nyaéta unsur anu ngajelaskeun iraha kajadian dina dongéng éta lumangsung.",
+                answer: false,
+                difficulty: "🟡 SEDENG",
+                category: "UNSUR INTRINSIK",
+                explanation: "Salah. Iraha lumangsungna kajadian disebut Latar Waktu. Ari Latar Tempat mah nuduhkeun di mana kajadianana."
+            },
+            {
+                id: 8,
+                question: "Tokoh anu miboga watek jahat, sombong, atawa resep nyusahkeun batur dina carita disebut tokoh protagonis.",
+                answer: false,
+                difficulty: "🟡 SEDENG",
+                category: "TOKOH JEUNG WATEK",
+                explanation: "Salah. Tokoh jahat atawa goreng watekna disebut Antagonis. Protagonis mah tokoh utama anu boga watek bageur."
+            },
+            {
+                id: 9,
+                question: "Dongéng jaman baheula sumebar sacara lisan ti sungut ka sungut sarta diwariskeun turun-tumurun.",
+                answer: true,
+                difficulty: "🟢 GAMPANG",
+                category: "CIRI DONGÉNG",
+                explanation: "Leres. Dongéng baheula mah sumebar sacara lisan (turun-tumurun ti kolot ka anak) sarta biasana teu kanyahoan saha pangarangna (anonim)."
+            },
+            {
+                id: 10,
+                question: "Amanat dina dongéng bisa ditepikeun sacara tersurat (langsung) atawa tersirat (saru/teu langsung).",
+                answer: true,
+                difficulty: "🟡 SEDENG",
+                category: "UNSUR INTRINSIK",
+                explanation: "Leres. Amanat bisa dituliskeun langsung ku pangarang atawa kudu dipikirkeun heula ku nu maca dumasar kana eusi carita."
+            },
+            {
+                id: 11,
+                excerpt: "Si Kabayan diajakan ngala nangka ku mertuana. Ngarasa nangka éta beurat, Si Kabayan ngagulingkeun nangka ka walungan bari ngomong: 'Prak balik heula nangka, engké urang susul ti tukang!' Si Kabayan tuluy balik ka imah bari teu mawa nangka.",
+                question: "Dumasar kana cutatan di luhur, watek Si Kabayan dina carita nyaéta kedul (kesel) jeung rada bodo/bodor.",
+                answer: true,
+                difficulty: "🔴 TANTANGAN",
+                category: "ANALISIS CUTATAN",
+                explanation: "Leres. Si Kabayan nganggap nangka bisa leumpang sorangan nuturkeun walungan, nu némbongkeun watekna anu polos tapi bodor jeung kedul."
+            },
+            {
+                id: 12,
+                excerpt: "Sakadang Monyet jeung Sakadang Kuya melak tangkal pisang. Pisang Sakadang Monyet paéh sabab nu dipelakna pucukna, sedengkeun pisang Sakadang Kuya buahan subur. Monyet tuluy nitah kuya sangkan manéhna nu ngala pisang tapi kalah didahar kabeh ku monyet di atas tangkal.",
+                question: "Dumasar kana cutatan dongéng di luhur, watek Sakadang Monyet nyaéta licik jeung sarakah.",
+                answer: true,
+                difficulty: "🔴 TANTANGAN",
+                category: "ANALISIS CUTATAN",
+                explanation: "Leres. Sakadang Monyet ngamangpaatkeun Sakadang Kuya sarta dahar kabéh pisang sorangan tanpa ngabagi."
+            },
+            {
+                id: 13,
+                excerpt: "Nyi Roro Kidul dipikawanoh ku masarakat basisir kidul pulo Jawa salaku ratu nu nguasai laut kidul. Loba jalma nu percaya sarta ngalakukeun ritual dina waktu-waktu tangtu.",
+                question: "Cutatan dongéng di luhur kaasup kana rupa dongéng Sasakala.",
+                answer: false,
+                difficulty: "🔴 TANTANGAN",
+                category: "ANALISIS CUTATAN",
+                explanation: "Salah. Carita Nyi Roro Kidul kaasup kana rupa dongéng Mite, sabab patali jeung kapercayaan mahluk gaib/dewa."
+            },
+            {
+                id: 14,
+                excerpt: "Prabu Siliwangi nyaéta raja anu gagah sakti ti Karajaan Sunda Galuh/Siliwangi anu ngajaga pahlawan sarta rahayatna kalawan adil jeung wicaksana nepi ka ngahiang jadi maung bodas.",
+                question: "Dongéng anu nyaritakeun perjuangan pahlawan kawas Prabu Siliwangi atawa Ciung Wanara disebut Dongéng Sage.",
+                answer: true,
+                difficulty: "🔴 TANTANGAN",
+                category: "ANALISIS CUTATAN",
+                explanation: "Leres. Sage (Babad) nyaéta dongéng nu ngandung unsur kapahlawanan atawa sajarah baheula."
+            },
+            {
+                id: 15,
+                excerpt: "Jaman baheula aya budak yatim ngaranna Si Sangkuriang nu teu nyaho yen Dayang Sumbi téh indungna sorangan. Lantaran ambek teu diturutkeun kahayangna, Sangkuriang menendang parahu nepi ka tibalik sarta jadi Gunung Tangkuban Parahu.",
+                question: "Piwuruk (amanat) anu tiasa dicokot tina carita Sangkuriang nyaéta urang kudu ngahormatan kolot sarta teu meunang nuturkeun hawa napsu.",
+                answer: true,
+                difficulty: "🔴 TANTANGAN",
+                category: "ANALISIS CUTATAN",
+                explanation: "Leres. Dongéng Sangkuriang ngajarkeun urang pikeun taat ka kolot jeung ngendalikeun émosi."
+            }
+        ];
+
+        let gameState = {
+            studentName: '',
+            studentClass: 'VII-A',
+            currentIndex: 0,
+            score: 0,
+            correctCount: 0,
+            wrongCount: 0,
+            streak: 0,
+            timer: 15,
+            timerInterval: null,
+            isAnswerLocked: false,
+            audioMuted: false,
+            cameraActive: false,
+            cameraMirrored: true,
+            handsModel: null,
+            cameraStream: null
+        };
+
+        /* Hold threshold configuration for MediaPipe gesture stabilization */
+        let holdTimerCount = 0;
+        const HOLD_THRESHOLD = 8; // 8 consecutive frames (~0.8 sec)
+
+        function showScreen(screenId) {
+            ['home', 'materi', 'instructions', 'game', 'result'].forEach(id => {
+                const el = document.getElementById(`screen-${id}`);
+                if (el) {
+                    if (id === screenId) {
+                        el.classList.remove('hidden');
+                    } else {
+                        el.classList.add('hidden');
+                    }
+                }
+            });
+
+            if (screenId !== 'game' && gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+            }
+        }
+
+        function startAppGame() {
+            const nameInput = document.getElementById('student-name').value.trim();
+            const classInput = document.getElementById('student-class').value;
+            
+            gameState.studentName = nameInput || 'Murid SMP';
+            gameState.studentClass = classInput;
+            gameState.currentIndex = 0;
+            gameState.score = 0;
+            gameState.correctCount = 0;
+            gameState.wrongCount = 0;
+            gameState.streak = 0;
+            gameState.isAnswerLocked = false;
+
+            showScreen('game');
+            loadQuestion(0);
+            initCameraTracking();
+        }
+
+        function loadQuestion(index) {
+            if (index >= QUESTION_BANK.length) {
+                finishGame();
+                return;
+            }
+
+            const q = QUESTION_BANK[index];
+            gameState.currentIndex = index;
+            gameState.isAnswerLocked = false;
+            gameState.timer = 15;
+
+            // Play new question chime
+            playSound('question');
+
+            // Reset UI Badges & Progress
+            document.getElementById('game-progress-text').innerText = `SOAL ${index + 1} / ${QUESTION_BANK.length}`;
+            document.getElementById('game-score').innerText = gameState.score;
+            
+            const percentage = ((index + 1) / QUESTION_BANK.length) * 100;
+            document.getElementById('game-progress-bar').style.width = `${percentage}%`;
+
+            const diffBadge = document.getElementById('difficulty-badge');
+            diffBadge.innerText = q.difficulty;
+            if (q.difficulty.includes('GAMPANG')) {
+                diffBadge.className = 'bg-emerald-500 text-white font-bold text-xs px-2.5 py-1 rounded-lg';
+            } else if (q.difficulty.includes('SEDENG')) {
+                diffBadge.className = 'bg-amber-500 text-white font-bold text-xs px-2.5 py-1 rounded-lg';
+            } else {
+                diffBadge.className = 'bg-rose-500 text-white font-bold text-xs px-2.5 py-1 rounded-lg';
+            }
+
+            // Streak Badge
+            const streakBadge = document.getElementById('streak-badge');
+            if (gameState.streak >= 2) {
+                document.getElementById('streak-count').innerText = gameState.streak;
+                streakBadge.classList.remove('hidden');
+            } else {
+                streakBadge.classList.add('hidden');
+            }
+
+            // Question Text & Category
+            document.getElementById('question-category').innerText = q.category;
+            document.getElementById('question-text').innerText = `"${q.question}"`;
+
+            // Excerpt handling
+            const excerptContainer = document.getElementById('question-excerpt-container');
+            const excerptText = document.getElementById('question-excerpt-text');
+            if (q.excerpt) {
+                excerptText.innerText = q.excerpt;
+                excerptContainer.classList.remove('hidden');
+            } else {
+                excerptContainer.classList.add('hidden');
+            }
+
+            // Reset Gesture rings
+            resetGestureRings();
+
+            // Read out question text with speech synthesis
+            if (!gameState.audioMuted) {
+                const fullTextToRead = q.excerpt 
+                    ? `Soal ${index + 1}. ${q.category}. Cutatan: ${q.excerpt}. Patarosan: ${q.question}` 
+                    : `Soal ${index + 1}. ${q.category}. ${q.question}`;
+                speakText(fullTextToRead);
+            }
+
+            // Start Timer
+            startQuestionTimer();
+        }
+
+        function startQuestionTimer() {
+            if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+            
+            const timerEl = document.getElementById('timer-text');
+            timerEl.innerText = `${gameState.timer}s`;
+
+            gameState.timerInterval = setInterval(() => {
+                if (gameState.isAnswerLocked) return;
+
+                gameState.timer--;
+                timerEl.innerText = `${gameState.timer}s`;
+
+                if (gameState.timer <= 0) {
+                    clearInterval(gameState.timerInterval);
+                    handleAnswerTimeout();
+                }
+            }, 1000);
+        }
+
+        function handleAnswerTimeout() {
+            if (gameState.isAnswerLocked) return;
+            gameState.isAnswerLocked = true;
+            gameState.wrongCount++;
+            gameState.streak = 0;
+
+            const q = QUESTION_BANK[gameState.currentIndex];
+            showFeedbackModal(false, `⏰ Waktosna parantos réngsé! ${q.explanation}`);
+        }
+
+        function handleAnswerSelection(userChoiceBool) {
+            if (gameState.isAnswerLocked) return;
+            gameState.isAnswerLocked = true;
+            if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+
+            const q = QUESTION_BANK[gameState.currentIndex];
+            const isCorrect = (userChoiceBool === q.answer);
+
+            if (isCorrect) {
+                gameState.score += 10;
+                gameState.correctCount++;
+                gameState.streak++;
+                playSound('correct');
+            } else {
+                gameState.wrongCount++;
+                gameState.streak = 0;
+                playSound('wrong');
+            }
+
+            showFeedbackModal(isCorrect, q.explanation);
+        }
+
+        function showFeedbackModal(isCorrect, explanationText) {
+            const modal = document.getElementById('feedback-modal');
+            const iconBox = document.getElementById('feedback-icon-box');
+            const title = document.getElementById('feedback-title');
+            const expl = document.getElementById('feedback-explanation');
+
+            if (isCorrect) {
+                iconBox.innerText = '🎉';
+                iconBox.className = 'w-20 h-20 mx-auto rounded-full flex items-center justify-center text-4xl bg-emerald-100 text-emerald-700 border-4 border-emerald-400';
+                title.innerText = '🎉 LERES!';
+                title.className = 'text-2xl font-extrabold text-emerald-700';
+            } else {
+                iconBox.innerText = '❌';
+                iconBox.className = 'w-20 h-20 mx-auto rounded-full flex items-center justify-center text-4xl bg-rose-100 text-rose-700 border-4 border-rose-400';
+                title.innerText = '❌ TEU LERES';
+                title.className = 'text-2xl font-extrabold text-rose-700';
+            }
+
+            expl.innerText = explanationText;
+            modal.classList.remove('hidden');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                loadQuestion(gameState.currentIndex + 1);
+            }, 2500);
+        }
+
+        function finishGame() {
+            showScreen('result');
+
+            document.getElementById('result-student-name').innerText = gameState.studentName;
+            document.getElementById('result-student-class').innerText = gameState.studentClass;
+            document.getElementById('result-correct').innerText = gameState.correctCount;
+            document.getElementById('result-wrong').innerText = gameState.wrongCount;
+
+            const total = QUESTION_BANK.length;
+            const finalScore = Math.round((gameState.correctCount / total) * 100);
+            document.getElementById('result-final-score').innerText = finalScore;
+
+            const bannerTitle = document.getElementById('result-badge-title');
+            const message = document.getElementById('result-message');
+
+            if (finalScore >= 90) {
+                bannerTitle.innerText = '🌟 90–100 — Saé Pisan!';
+                message.innerText = 'Hebat! Anjeun geus ngajajah dunya dongéng Sunda kalayan sampurna. Hayu terus maca dongéng sangkan beuki wanoh kana basa jeung budaya Sunda.';
+            } else if (finalScore >= 75) {
+                bannerTitle.innerText = '👏 75–89 — Saé!';
+                message.innerText = 'Pangaweruh anjeun ngeunaan dongéng Sunda tos saé! Terus tingkatkeun diajar ngeunaan unsur-unsur intrinsik jeung rupa dongéng.';
+            } else if (finalScore >= 60) {
+                bannerTitle.innerText = '🙂 60–74 — Cukup';
+                message.innerText = 'Anjeun tos ngartos dasar-dasar dongéng Sunda. Cobi maca deui materi sangkan langkung paham kana rupa-rupa dongéng.';
+            } else {
+                bannerTitle.innerText = '📚 <60 — Hayu Diajar Deui';
+                message.innerText = 'Ulah leutik hate! Hayu diajar deui ku cara maca modul dongéng sarta cobaan maén sakali deui.';
+            }
+        }
+
+        function initCameraTracking() {
+            const videoElement = document.getElementById('webcam');
+            const canvasElement = document.getElementById('output-canvas');
+            const canvasCtx = canvasElement.getContext('2d');
+            const statusText = document.getElementById('camera-status-text');
+            const loadingBox = document.getElementById('camera-loading');
+
+            if (gameState.handsModel) return;
+
+            statusText.innerText = 'Menginisialisasi MediaPipe Hands...';
+
+            const hands = new Hands({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+            });
+
+            hands.setOptions({
+                maxNumHands: 2,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.6,
+                minTrackingConfidence: 0.6
+            });
+
+            hands.onResults((results) => {
+                canvasCtx.save();
+                canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+                let handDetected = false;
+                let activeChoice = null;
+
+                if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                    handDetected = true;
+
+                    for (let i = 0; i < results.multiHandLandmarks.length; i++) {
+                        const landmarks = results.multiHandLandmarks[i];
+                        const handedness = results.multiHandedness[i];
+
+                        drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, { color: '#00FF7F', strokeWidth: 3 });
+                        drawLandmarks(canvasCtx, landmarks, { color: '#FFD700', strokeWidth: 1, radius: 4 });
+
+                        const wrist = landmarks[0];
+                        const middleTip = landmarks[12];
+                        const isHandRaised = middleTip.y < wrist.y;
+
+                        if (isHandRaised) {
+                            const handLabel = handedness.label;
+                            const xPos = landmarks[9].x;
+                            
+                            if (handLabel === 'Right' || xPos > 0.5) {
+                                activeChoice = 'LERES';
+                            } else {
+                                activeChoice = 'SALAH';
+                            }
+                        }
+                    }
+                }
+
+                canvasCtx.restore();
+                updateGestureIndicator(handDetected, activeChoice);
+            });
+
+            gameState.handsModel = hands;
+
+            const camera = new Camera(videoElement, {
+                onFrame: async () => {
+                    await hands.send({ image: videoElement });
+                },
+                width: 640,
+                height: 480
+            });
+
+            camera.start().then(() => {
+                loadingBox.classList.add('hidden');
+                gameState.cameraActive = true;
+            }).catch((err) => {
+                console.warn('Camera permission denied or unavailable:', err);
+                statusText.innerText = 'Kaméra teu diaktipkeun. Tetep tiasa maén ku mencét tombol!';
+            });
+        }
+
+        function updateGestureIndicator(detected, choice) {
+            const indicator = document.getElementById('gesture-indicator');
+            const ringLeres = document.getElementById('ring-leres');
+            const ringSalah = document.getElementById('ring-salah');
+            const fillLeres = document.getElementById('ring-leres-fill');
+            const fillSalah = document.getElementById('ring-salah-fill');
+
+            if (gameState.isAnswerLocked) {
+                indicator.innerHTML = `<span>🟢</span> <span>Jawaban parantos kadeteksi!</span>`;
+                resetGestureRings();
+                return;
+            }
+
+            if (!detected || !choice) {
+                indicator.innerHTML = `<span>🟡</span> <span>Mangga arahkeun leungeun ka kaméra</span>`;
+                resetGestureRings();
+                holdTimerCount = 0;
+                return;
+            }
+
+            holdTimerCount++;
+            const progressPct = Math.min(100, Math.round((holdTimerCount / HOLD_THRESHOLD) * 100));
+            const dashOffset = 100 - progressPct;
+
+            if (choice === 'LERES') {
+                indicator.innerHTML = `<span>✋</span> <span class="text-emerald-400 font-extrabold">LERES DETECTED (${progressPct}%)</span>`;
+                if (ringLeres) ringLeres.classList.remove('hidden');
+                if (ringSalah) ringSalah.classList.add('hidden');
+                if (fillLeres) fillLeres.style.strokeDashoffset = dashOffset;
+            } else if (choice === 'SALAH') {
+                indicator.innerHTML = `<span>🤚</span> <span class="text-rose-400 font-extrabold">SALAH DETECTED (${progressPct}%)</span>`;
+                if (ringSalah) ringSalah.classList.remove('hidden');
+                if (ringLeres) ringLeres.classList.add('hidden');
+                if (fillSalah) fillSalah.style.strokeDashoffset = dashOffset;
+            }
+
+            if (holdTimerCount >= HOLD_THRESHOLD) {
+                const choiceBool = (choice === 'LERES');
+                holdTimerCount = 0;
+                resetGestureRings();
+                handleAnswerSelection(choiceBool);
+            }
+        }
+
+        function resetGestureRings() {
+            const ringLeres = document.getElementById('ring-leres');
+            const ringSalah = document.getElementById('ring-salah');
+            const fillLeres = document.getElementById('ring-leres-fill');
+            const fillSalah = document.getElementById('ring-salah-fill');
+
+            if (ringLeres) ringLeres.classList.add('hidden');
+            if (ringSalah) ringSalah.classList.add('hidden');
+            if (fillLeres) fillLeres.style.strokeDashoffset = 100;
+            if (fillSalah) fillSalah.style.strokeDashoffset = 100;
+        }
+
+        function toggleCameraMirror() {
+            const video = document.getElementById('webcam');
+            const canvas = document.getElementById('output-canvas');
+            if (video && canvas) {
+                gameState.cameraMirrored = !gameState.cameraMirrored;
+                if (gameState.cameraMirrored) {
+                    video.classList.add('mirror-video');
+                    canvas.classList.add('mirror-video');
+                } else {
+                    video.classList.remove('mirror-video');
+                    canvas.classList.remove('mirror-video');
+                }
+            }
+        }
+
+        function handleOptionHover(isLeres) {
+            playSound('hover');
+            if (!gameState.audioMuted) {
+                const text = isLeres ? "Pilihan Leres, Tangan Katuhu" : "Pilihan Salah, Tangan Kénca";
+                speakText(text);
+            }
+        }
+
+        function toggleAudioMute() {
+            gameState.audioMuted = !gameState.audioMuted;
+            const icon = document.getElementById('audio-icon');
+            if (gameState.audioMuted) {
+                icon.className = 'fas fa-volume-mute text-rose-300';
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            } else {
+                icon.className = 'fas fa-volume-up';
+                playSound('hover');
+            }
+        }
+
+        function speakQuestionText() {
+            const q = QUESTION_BANK[gameState.currentIndex];
+            if (q) {
+                const fullTextToRead = q.excerpt 
+                    ? `Cutatan: ${q.excerpt}. Patarosan: ${q.question}` 
+                    : q.question;
+                speakText(fullTextToRead);
+            }
+        }
+
+        function speakText(text) {
+            if ('speechSynthesis' in window && !gameState.audioMuted) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'id-ID';
+                utterance.rate = 0.92;
+                utterance.pitch = 1.05;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function playSound(type) {
+            if (gameState.audioMuted) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                if (type === 'question') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.frequency.setValueAtTime(392, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(523.25, ctx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                } else if (type === 'hover') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.frequency.setValueAtTime(440, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.05, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.08);
+                } else if (type === 'correct') {
+                    const osc1 = ctx.createOscillator();
+                    const osc2 = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc1.connect(gain);
+                    osc2.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc1.frequency.setValueAtTime(523.25, ctx.currentTime);
+                    osc1.frequency.exponentialRampToValueAtTime(659.25, ctx.currentTime + 0.2);
+                    osc2.frequency.setValueAtTime(659.25, ctx.currentTime);
+                    osc2.frequency.exponentialRampToValueAtTime(783.99, ctx.currentTime + 0.2);
+
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.45);
+                    
+                    osc1.start();
+                    osc2.start();
+                    osc1.stop(ctx.currentTime + 0.45);
+                    osc2.stop(ctx.currentTime + 0.45);
+                } else if (type === 'wrong') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.frequency.setValueAtTime(220, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(164.81, ctx.currentTime + 0.25);
+
+                    gain.gain.setValueAtTime(0.18, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.35);
+                }
+            } catch (e) {
+                // Ignore audio context error if unallowed
+            }
+        }
+
+        function toggleGithubGuideModal() {
+            const modal = document.getElementById('github-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        window.addEventListener('resize', () => {
+            const video = document.getElementById('webcam');
+            const canvas = document.getElementById('output-canvas');
+            if (video && canvas) {
+                canvas.width = video.clientWidth;
+                canvas.height = video.clientHeight;
+            }
+        });
+    </script>
+</body>
+</html>
